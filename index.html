@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Code Snippet Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --success-color: #2ecc71;
+            --light-bg: #f8f9fa;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background-color: #f5f7fb;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: white !important;
+        }
+
+        .search-container {
+            position: relative;
+            max-width: 400px;
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+
+        .search-input {
+            padding-left: 20px;
+            border-radius: 25px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        }
+
+        .code-item {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+            box-shadow: var(--card-shadow);
+        }
+
+        .code-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--hover-shadow);
+            border-color: var(--primary-color);
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .code-title {
+            font-weight: 600;
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .copy-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .copy-btn:hover {
+            background: var(--secondary-color);
+            transform: scale(1.05);
+        }
+
+        .copy-btn.copy-success {
+            background: var(--success-color);
+        }
+
+        .copy-btn.copy-error {
+            background: #e74c3c;
+        }
+
+        .command-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-all;
+            position: relative;
+            margin: 0;
+            overflow-x: auto;
+        }
+
+        .command-line {
+            margin-bottom: 5px;
+        }
+
+        .command-line:last-child {
+            margin-bottom: 0;
+        }
+
+        .alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            min-width: 300px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .stats-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        .stats-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+
+        .category-badge {
+            display: inline-block;
+            background: #e9ecef;
+            color: #495057;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            color: white;
+            margin: 0;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            border-bottom: 3px solid var(--primary-color);
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .search-container {
+                max-width: 100%;
+                margin-top: 10px;
+            }
+
+            .code-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .copy-btn {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    <i class="bi bi-code-slash me-2"></i>Code Snippets
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <div class="search-container ms-auto">
+                        <i class="bi bi-search"></i>
+                        <input type="text" class="form-control search-input" id="searchInput"
+                            placeholder="Search codes or commands...">
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container mt-4 ">
+        <!-- Alert for copy feedback -->
+        <div class="alert alert-success alert-dismissible fade" id="copyAlert" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            <span id="alertMessage">Code copied to clipboard!</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="row mb-4 d-none">
+            <div class="col-md-3 col-sm-6">
+                <div class="stats-card">
+                    <div class="stats-number" id="totalCodes">0</div>
+                    <div class="stats-label">Total Snippets</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stats-card">
+                    <div class="stats-number" id="visibleCodes">0</div>
+                    <div class="stats-label">Visible Snippets</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <h2>Code Snippets</h2>
+                <div class="list-group" id="code-list">
+                    <!-- Codes will be dynamically added here -->
+                </div>
+
+                <div id="noResults" class="empty-state" style="display: none;">
+                    <i class="bi bi-search"></i>
+                    <h4>No matching snippets found</h4>
+                    <p>Try searching with different keywords</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/records/code.js"></script>
+    <!-- Sample records data (in production, this would be in a separate code.js file) -->
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxMbv+IhVeN7Jh"
+        crossorigin="anonymous"></script>
+
+    <script>
+        let filteredRecords = [...records];
+
+        // Initialize the code list
+        function initializeCodeList() {
+            const codeList = document.getElementById('code-list');
+
+            // Check if records array exists
+            if (typeof records === 'undefined') {
+                console.error('Records array not found!');
+                codeList.innerHTML = '<div class="alert alert-warning">No codes available. Please check your code.js file.</div>';
+                return;
+            }
+
+            renderCodeList();
+            updateStats();
+        }
+
+        // Render code list
+        function renderCodeList() {
+            const codeList = document.getElementById('code-list');
+            const noResults = document.getElementById('noResults');
+
+            // Clear any existing content
+            codeList.innerHTML = '';
+
+            if (filteredRecords.length === 0) {
+                noResults.style.display = 'block';
+                return;
+            }
+
+            noResults.style.display = 'none';
+
+            filteredRecords.forEach(item => {
+                const codeItem = document.createElement('div');
+                codeItem.className = 'code-item';
+                codeItem.id = `code-${item.id}`;
+
+                // Split command into lines for better formatting
+                const commandLines = item.command.split('\n')
+                    .map(line => `<div class="command-line">${line}</div>`)
+                    .join('');
+
+                codeItem.innerHTML = `
+                    <div class="code-header">
+                        <div>
+                            <h3 class="code-title">${item.code}</h3>
+                            <div>${item.description}</div>
+                            ${item.category ? `<span class="category-badge">${item.category}</span>` : ''}
+                        </div>
+                        <button class="copy-btn" onclick="copyCommand('${item.id}')" title="Copy all commands">
+                            <i class="bi bi-clipboard"></i> Copy
+                        </button>
+                    </div>
+                    <div class="command-block">${commandLines}</div>
+                `;
+
+                codeList.appendChild(codeItem);
+            });
+
+            updateStats();
+        }
+
+        // Copy command function
+        function copyCommand(id) {
+            const item = records.find(r => r.id == id);
+            if (!item) return;
+
+            const button = event.target.closest('.copy-btn');
+            const icon = button.querySelector('i');
+
+            navigator.clipboard.writeText(item.command)
+                .then(() => {
+                    // Show success feedback
+                    showAlert(`"${item.code}" commands copied to clipboard!`, 'success');
+
+                    // Change button appearance
+                    button.classList.add('copy-success');
+                    icon.classList.remove('bi-clipboard');
+                    icon.classList.add('bi-check-circle');
+
+                    // Reset button after 2 seconds
+                    setTimeout(() => {
+                        button.classList.remove('copy-success');
+                        icon.classList.remove('bi-check-circle');
+                        icon.classList.add('bi-clipboard');
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy: ', err);
+                    showAlert('Failed to copy commands', 'error');
+
+                    // Change button appearance for error
+                    button.classList.add('copy-error');
+                    icon.classList.remove('bi-clipboard');
+                    icon.classList.add('bi-x-circle');
+
+                    // Reset button after 2 seconds
+                    setTimeout(() => {
+                        button.classList.remove('copy-error');
+                        icon.classList.remove('bi-x-circle');
+                        icon.classList.add('bi-clipboard');
+                    }, 2000);
+                });
+        }
+
+        // Filter codes based on search input
+        function filterCodes() {
+            const searchInput = document.getElementById('searchInput');
+            const searchTerm = searchInput.value.toLowerCase().trim();
+
+            if (!searchTerm) {
+                filteredRecords = [...records];
+            } else {
+                filteredRecords = records.filter(item => {
+                    return item.code.toLowerCase().includes(searchTerm) ||
+                        item.description.toLowerCase().includes(searchTerm) ||
+                        item.command.toLowerCase().includes(searchTerm) ||
+                        (item.category && item.category.toLowerCase().includes(searchTerm));
+                });
+            }
+
+            renderCodeList();
+        }
+
+        // Update statistics
+        function updateStats() {
+            document.getElementById('totalCodes').textContent = records.length;
+            document.getElementById('visibleCodes').textContent = filteredRecords.length;
+        }
+
+        // Show alert function
+        function showAlert(message, type = 'success') {
+            const alert = document.getElementById('copyAlert');
+            const alertMessage = document.getElementById('alertMessage');
+
+            alertMessage.textContent = message;
+
+            // Set alert type
+            if (type === 'success') {
+                alert.className = 'alert alert-success alert-dismissible fade show';
+            } else {
+                alert.className = 'alert alert-danger alert-dismissible fade show';
+            }
+
+            // Auto hide after 3 seconds
+            setTimeout(() => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }, 3000);
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeCodeList();
+
+            // Add event listener for search input
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', filterCodes);
+
+            // Add event listener for Enter key in search
+            searchInput.addEventListener('keyup', function (event) {
+                if (event.key === 'Enter') {
+                    filterCodes();
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
