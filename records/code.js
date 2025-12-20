@@ -5,7 +5,8 @@ const Rec2 = [
         id: 101,
         code: "Add Github",
         description: "Initialize and push to GitHub",
-        command: `git init
+        command: `
+git init
 git add .
 git commit -m "Initial commit"
 git branch -M main
@@ -17,7 +18,8 @@ git push -u origin main`,
         id: 100,
         code: "Update Github",
         description: "Commit and push changes",
-        command: `git add .
+        command: `
+git add .
 git commit -m "Update: Your commit message here"
 git push`,
         category: "Git"
@@ -41,7 +43,8 @@ const Rec1 = [
         category: "CodeIgniter",
         code: "Web 404 Error",
         description: "Customize the 404 error page in CodeIgniter",
-        command: `$routes->set404Override(function () {
+        command: `
+$routes->set404Override(function () {
     return view('errors/custom404');
 });`
     },
@@ -50,7 +53,8 @@ const Rec1 = [
         category: "CodeIgniter",
         code: "Auth Middleware",
         description: "Implement authentication middleware in CodeIgniter to protect routes from unauthorized access.",
-        command: `public function __construct()
+        command: `
+public function __construct()
 {
     $this->session = session();
     $this->router = service('router');
@@ -70,28 +74,30 @@ const Rec1 = [
         echo '<script>window.location.href= "' . base_url() . '";</script>';
     die();
     }
-    }`
+}`
     },
     {
         id: 3,
         category: "CodeIgniter",
         code: "Data Encryption",
         description: "Encrypt data using OpenSSL in CodeIgniter",
-        command: `public function dataEncrypt($value)
-    {
+        command: `
+public function dataEncrypt($value)
+{
     $key = "mysecretkey12345678901234567890";
     $iv = openssl_random_pseudo_bytes(16);
     $cipher = "AES-256-CBC";
     $encrypted = openssl_encrypt($value, $cipher, $key, 0, $iv);
     return base64_encode($iv . $encrypted);
-    }`
+}`
     },
     {
         id: 4,
         category: "CodeIgniter",
         code: "Data Decryption",
         description: "Decrypt data using OpenSSL in CodeIgniter",
-        command: `public function dataDecrypt($encryptedData)
+        command: `
+public function dataDecrypt($encryptedData)
     {
     $key = "mysecretkey12345678901234567890";
     $cipher = "AES-256-CBC";
@@ -99,9 +105,96 @@ const Rec1 = [
     $iv = substr($data, 0, 16);
     $encrypted = substr($data, 16);
     return openssl_decrypt($encrypted, $cipher, $key, 0, $iv);
-    }`
+}`
+    }, {
+        id: 100,
+        category: "CodeIgniter",
+        code: "Authentication",
+        description: "Implement authentication in CodeIgniter using Filter",
+        command: `
+public array $aliases = [
+    'apiauth' => \App\Filters\ApiAuthFilter::class,
+];
+// Routes
+$routes->group('api', ['filter' => 'apiauth'], function ($routes) {
+    $routes->post('search', 'Api::searchFunc');
+});
+
+//App/Filters/ApiAuthFilter.php
+
+
+namespace App\Filters;
+
+use CodeIgniter\HTTP\RequestInterface;
+use CodeIgniter\HTTP\ResponseInterface;
+use CodeIgniter\Filters\FilterInterface;
+
+class ApiAuthFilter implements FilterInterface
+{
+    public function before(RequestInterface $request, $arguments = null)
+    {
+        $config = config('AccessProperties');
+        $apiKey = $config->api_key;
+
+        $header = $request->getHeaderLine('X-Api');
+        $token  = str_replace('Bearer ', '', $header);
+
+        if ($token !== $apiKey) {
+            return service('response')
+                ->setJSON([
+                    'status'  => false,
+                    'message' => 'Unauthorized access'
+                ])
+                ->setStatusCode(401);
+        }
+    }
+
+    public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)
+    {
+        // No action required
+    }
+}
+`
     }
 ];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
