@@ -4,9 +4,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CodeSpark  Manager</title>
+    <title>CodeKeep Manager</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         :root {
@@ -110,6 +109,16 @@
             box-shadow: var(--card-shadow);
             position: relative;
             overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .code-item::before {
@@ -291,7 +300,7 @@
 
         .category-badge {
             display: inline-block;
-            background: rgb(255 255 255);
+            background: rgba(99, 102, 241, 0.1);
             color: var(--primary-color);
             padding: 6px 14px;
             border-radius: 20px;
@@ -301,11 +310,59 @@
             margin-bottom: 8px;
             border: 1px solid rgba(99, 102, 241, 0.3);
             transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .category-badge:hover {
             background: rgba(99, 102, 241, 0.2);
             transform: translateY(-2px);
+        }
+
+        .category-badge.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .category-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .category-filter h5 {
+            width: 100%;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+
+        .load-more-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: block;
+            margin: 30px auto;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .load-more-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--glow-primary);
+        }
+
+        .load-more-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
         }
 
         h1 {
@@ -377,42 +434,10 @@
             .stats-number {
                 font-size: 1.8rem;
             }
-        }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
+            .category-filter {
+                flex-direction: column;
             }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .code-item,
-        .stats-card {
-            animation: fadeIn 0.5s ease forwards;
-        }
-
-        .theme-toggle {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            border-radius: 20px;
-            padding: 8px 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .theme-toggle:hover {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
         }
     </style>
 </head>
@@ -423,11 +448,8 @@
             <div class="container d-flex ">
                 <a class="navbar-brand d-none d-md-flex" href="#">
                     <i class="bi bi-code-slash me-2"></i>
-                    <span class="d-none d-md-flex"> CodeSpark</span>
+                    <span class="d-none d-md-flex"> CodeKeep</span>
                 </a>
-                <!-- <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button> -->
                 <div class="">
                     <div class="search-container d-flex ">
                         <input type="text" class="form-control search-input ps-3" id="searchInput"
@@ -457,9 +479,21 @@
             <div class="col-md-3 col-sm-6">
                 <div class="stats-card">
                     <div class="stats-number" id="visibleCodes">0</div>
-                    <div class="stats-label">Visible Snippets</div>
+                    <div class="stats-label">Displayed</div>
                 </div>
             </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stats-card">
+                    <div class="stats-number" id="loadedCount">0</div>
+                    <div class="stats-label">Loaded</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Filter -->
+        <div class="category-filter" id="categoryFilter">
+            <h5><i class="bi bi-filter me-2"></i>Filter by Category</h5>
+            <!-- Categories will be dynamically generated -->
         </div>
 
         <div class="row">
@@ -469,10 +503,14 @@
                     <!-- Codes will be dynamically added here -->
                 </div>
 
+                <button id="loadMoreBtn" class="load-more-btn" style="display: none;">
+                    <i class="bi bi-arrow-down-circle me-2"></i>Load More
+                </button>
+
                 <div id="noResults" class="empty-state" style="display: none;">
                     <i class="bi bi-search"></i>
                     <h4>No matching snippets found</h4>
-                    <p>Try searching with different keywords</p>
+                    <p>Try searching with different keywords or clear filters</p>
                 </div>
             </div>
         </div>
@@ -490,79 +528,209 @@
         </div>
     </div>
 
-
-
+    <!-- Your code.js file will be loaded here -->
     <script src="./records/code.js"></script>
-
-
-    <!-- Sample records data (in production, this would be in a separate code.js file) -->
-
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxMbv+IhVeN7Jh"
         crossorigin="anonymous"></script>
 
     <script>
-        let filteredRecords = [...records];
+        // Configuration
+        const INITIAL_LOAD_LIMIT = 5;
+        const LOAD_MORE_LIMIT = 5;
+        
+        let filteredRecords = [];
+        let displayedRecords = [];
+        let loadedCount = 0;
+        let selectedCategory = null;
+        let currentSearchTerm = '';
 
-        // Initialize the code list
-        function initializeCodeList() {
-            const codeList = document.getElementById('code-list');
-
-            // Check if records array exists
-            if (typeof records === 'undefined') {
-                console.error('Records array not found!');
-                codeList.innerHTML = '<div class="alert alert-warning">No codes available. Please check your code.js file.</div>';
+        // Initialize the application
+        function initializeApp() {
+            // Check if records exist
+            if (typeof records === 'undefined' || !Array.isArray(records)) {
+                console.error('Records array not found or invalid!');
+                document.getElementById('code-list').innerHTML = 
+                    '<div class="alert alert-warning">No codes available. Please check your code.js file.</div>';
                 return;
             }
 
-            renderCodeList();
+            // Initialize with all records
+            filteredRecords = [...records];
+            
+            // Initialize category filter
+            initializeCategoryFilter();
+            
+            // Load initial data
+            loadInitialData();
+            
+            // Update stats
             updateStats();
         }
 
-        // Render code list
-        function renderCodeList() {
-            const codeList = document.getElementById('code-list');
-            const noResults = document.getElementById('noResults');
-
-            // Clear any existing content
-            codeList.innerHTML = '';
-
-            if (filteredRecords.length === 0) {
-                noResults.style.display = 'block';
-                return;
-            }
-
-            noResults.style.display = 'none';
-
-            filteredRecords.forEach(item => {
-                const codeItem = document.createElement('div');
-                codeItem.className = 'code-item';
-                codeItem.id = `code-${item.id}`;
-
-                // Split command into lines for better formatting
-                const commandLines = item.command.split('\n')
-                    .map(line => `<div class="command-line">${line}</div>`)
-                    .join('');
-
-                codeItem.innerHTML = `
-                    <div class="code-header">
-                        <div>
-                            <h3 class="code-title">${item.code}</h3>
-                            <div>${item.description}</div>
-                            ${item.category ? `<span class="category-badge">${item.category}</span>` : ''}
-                        </div>
-                        <button class="copy-btn" onclick="copyCommand('${item.id}')" title="Copy all commands">
-                            <i class="bi bi-clipboard"></i> Copy
-                        </button>
-                    </div>
-                    <div class="command-block">${commandLines}</div>
-                `;
-
-                codeList.appendChild(codeItem);
+        // Initialize category filter
+        function initializeCategoryFilter() {
+            const categoryFilter = document.getElementById('categoryFilter');
+            
+            // Get all unique categories
+            const categories = ['All', ...new Set(records
+                .map(record => record.category)
+                .filter(category => category && category.trim() !== ''))];
+            
+            // Create category badges
+            categories.forEach(category => {
+                const badge = document.createElement('span');
+                badge.className = 'category-badge';
+                if (category === 'All') {
+                    badge.classList.add('active');
+                }
+                badge.textContent = category;
+                badge.dataset.category = category;
+                
+                badge.addEventListener('click', () => {
+                    selectCategory(category === 'All' ? null : category);
+                });
+                
+                categoryFilter.appendChild(badge);
             });
+        }
 
+        // Select category
+        function selectCategory(category) {
+            selectedCategory = category;
+            
+            // Update active badge
+            document.querySelectorAll('.category-badge').forEach(badge => {
+                const badgeCategory = badge.dataset.category;
+                if ((category === null && badgeCategory === 'All') || 
+                    (category === badgeCategory)) {
+                    badge.classList.add('active');
+                } else {
+                    badge.classList.remove('active');
+                }
+            });
+            
+            // Filter and reload data
+            filterData();
+            resetAndLoadData();
+        }
+
+        // Filter data based on search and category
+        function filterData() {
+            filteredRecords = records.filter(item => {
+                // Category filter
+                if (selectedCategory && item.category !== selectedCategory) {
+                    return false;
+                }
+                
+                // Search filter
+                if (currentSearchTerm) {
+                    const searchLower = currentSearchTerm.toLowerCase();
+                    return item.code.toLowerCase().includes(searchLower) ||
+                           item.description.toLowerCase().includes(searchLower) ||
+                           item.command.toLowerCase().includes(searchLower) ||
+                           (item.category && item.category.toLowerCase().includes(searchLower));
+                }
+                
+                return true;
+            });
+            
+            // Reset loaded count
+            loadedCount = 0;
+            displayedRecords = [];
+        }
+
+        // Load initial data
+        function loadInitialData() {
+            loadedCount = 0;
+            displayedRecords = [];
+            loadMoreData();
+        }
+
+        // Load more data
+        function loadMoreData() {
+            const startIndex = loadedCount;
+            const endIndex = Math.min(loadedCount + LOAD_MORE_LIMIT, filteredRecords.length);
+            
+            for (let i = startIndex; i < endIndex; i++) {
+                displayedRecords.push(filteredRecords[i]);
+                createCodeItem(filteredRecords[i]);
+            }
+            
+            loadedCount = endIndex;
+            
+            // Update UI
+            updateLoadMoreButton();
             updateStats();
+        }
+
+        // Create a single code item
+        function createCodeItem(item) {
+            const codeList = document.getElementById('code-list');
+            
+            const codeItem = document.createElement('div');
+            codeItem.className = 'code-item';
+            codeItem.id = `code-${item.id}`;
+
+            const commandLines = item.command.split('\n')
+                .map(line => `<div class="command-line">${line}</div>`)
+                .join('');
+
+            codeItem.innerHTML = `
+                <div class="code-header">
+                    <div>
+                        <h3 class="code-title">${item.code}</h3>
+                        <div>${item.description}</div>
+                        ${item.category ? `<span class="category-badge" style="cursor: default;">${item.category}</span>` : ''}
+                    </div>
+                    <button class="copy-btn" onclick="copyCommand('${item.id}')" title="Copy all commands">
+                        <i class="bi bi-clipboard"></i> Copy
+                    </button>
+                </div>
+                <div class="command-block">${commandLines}</div>
+            `;
+
+            codeList.appendChild(codeItem);
+        }
+
+        // Reset and load data (for filters/search)
+        function resetAndLoadData() {
+            const codeList = document.getElementById('code-list');
+            codeList.innerHTML = '';
+            
+            loadedCount = 0;
+            displayedRecords = [];
+            
+            if (filteredRecords.length === 0) {
+                document.getElementById('noResults').style.display = 'block';
+                document.getElementById('loadMoreBtn').style.display = 'none';
+            } else {
+                document.getElementById('noResults').style.display = 'none';
+                loadMoreData();
+            }
+            
+            updateStats();
+        }
+
+        // Update load more button visibility
+        function updateLoadMoreButton() {
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            
+            if (loadedCount < filteredRecords.length) {
+                loadMoreBtn.style.display = 'block';
+                loadMoreBtn.disabled = false;
+                loadMoreBtn.innerHTML = `<i class="bi bi-arrow-down-circle me-2"></i>Load More (${filteredRecords.length - loadedCount} remaining)`;
+            } else {
+                loadMoreBtn.style.display = 'none';
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            document.getElementById('totalCodes').textContent = records.length;
+            document.getElementById('visibleCodes').textContent = filteredRecords.length;
+            document.getElementById('loadedCount').textContent = displayedRecords.length;
         }
 
         // Copy command function
@@ -575,15 +743,12 @@
 
             navigator.clipboard.writeText(item.command)
                 .then(() => {
-                    // Show success feedback
                     showAlert(`"${item.code}" commands copied to clipboard!`, 'success');
 
-                    // Change button appearance
                     button.classList.add('copy-success');
                     icon.classList.remove('bi-clipboard');
                     icon.classList.add('bi-check-circle');
 
-                    // Reset button after 2 seconds
                     setTimeout(() => {
                         button.classList.remove('copy-success');
                         icon.classList.remove('bi-check-circle');
@@ -594,12 +759,10 @@
                     console.error('Failed to copy: ', err);
                     showAlert('Failed to copy commands', 'error');
 
-                    // Change button appearance for error
                     button.classList.add('copy-error');
                     icon.classList.remove('bi-clipboard');
                     icon.classList.add('bi-x-circle');
 
-                    // Reset button after 2 seconds
                     setTimeout(() => {
                         button.classList.remove('copy-error');
                         icon.classList.remove('bi-x-circle');
@@ -608,46 +771,26 @@
                 });
         }
 
-        // Filter codes based on search input
-        function filterCodes() {
-            const searchInput = document.getElementById('searchInput');
-            const searchTerm = searchInput.value.toLowerCase().trim();
-
-            if (!searchTerm) {
-                filteredRecords = [...records];
-            } else {
-                filteredRecords = records.filter(item => {
-                    return item.code.toLowerCase().includes(searchTerm) ||
-                        item.description.toLowerCase().includes(searchTerm) ||
-                        item.command.toLowerCase().includes(searchTerm) ||
-                        (item.category && item.category.toLowerCase().includes(searchTerm));
-                });
-            }
-
-            renderCodeList();
+        // Search function
+        function searchCodes() {
+            currentSearchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+            filterData();
+            resetAndLoadData();
         }
 
-        // Update statistics
-        function updateStats() {
-            document.getElementById('totalCodes').textContent = records.length;
-            document.getElementById('visibleCodes').textContent = filteredRecords.length;
-        }
-
-        // Show alert function
+        // Show alert
         function showAlert(message, type = 'success') {
             const alert = document.getElementById('copyAlert');
             const alertMessage = document.getElementById('alertMessage');
 
             alertMessage.textContent = message;
 
-            // Set alert type
             if (type === 'success') {
                 alert.className = 'alert alert-success alert-dismissible fade show';
             } else {
                 alert.className = 'alert alert-danger alert-dismissible fade show';
             }
 
-            // Auto hide after 3 seconds
             setTimeout(() => {
                 const bsAlert = new bootstrap.Alert(alert);
                 bsAlert.close();
@@ -656,20 +799,27 @@
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function () {
-            initializeCodeList();
+            initializeApp();
 
-            // Add event listener for search input
+            // Search input event listener
             const searchInput = document.getElementById('searchInput');
-            searchInput.addEventListener('input', filterCodes);
+            let searchTimeout;
+            
+            searchInput.addEventListener('input', function () {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(searchCodes, 300); // Debounce 300ms
+            });
 
-            // Add event listener for Enter key in search
+            // Enter key in search
             searchInput.addEventListener('keyup', function (event) {
                 if (event.key === 'Enter') {
-                    filterCodes();
+                    searchCodes();
                 }
             });
+
+            // Load more button
+            document.getElementById('loadMoreBtn').addEventListener('click', loadMoreData);
         });
     </script>
 </body>
-
 </html>
