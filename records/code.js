@@ -98,7 +98,7 @@ public function dataEncrypt($value)
         description: "Decrypt data using OpenSSL in CodeIgniter",
         command: `
 public function dataDecrypt($encryptedData)
-    {
+{
     $key = "mysecretkey12345678901234567890";
     $cipher = "AES-256-CBC";
     $data = base64_decode($encryptedData);
