@@ -76,5 +76,19 @@ const records = [
         "description": "xfb vb",
         "command": "b vvb v",
         "id": 12
+    },
+    {
+        "category": "JavaScript",
+        "code": "cbvc bvn",
+        "description": "dvfcxc",
+        "command": "cvcv",
+        "id": 13
+    },
+    {
+        "category": "JavaScript",
+        "code": "bcvnbv",
+        "description": "cvxc",
+        "command": "xbcv v",
+        "id": 14
     }
 ];
