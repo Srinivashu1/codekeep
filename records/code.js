@@ -55,40 +55,5 @@ const records = [
         "description": "Implement authentication in CodeIgniter using Filter",
         "command": "public array $aliases = [\n    'apiauth' => \\App\\Filters\\ApiAuthFilter::class,\n];\n// Routes\n$routes->group('api', ['filter' => 'apiauth'], function ($routes) {\n    $routes->post('search', 'Api::searchFunc');\n});\n\n//App/Filters/ApiAuthFilter.php\n\n\nnamespace App\\Filters;\n\nuse CodeIgniter\\HTTP\\RequestInterface;\nuse CodeIgniter\\HTTP\\ResponseInterface;\nuse CodeIgniter\\Filters\\FilterInterface;\n\nclass ApiAuthFilter implements FilterInterface\n{\n    public function before(RequestInterface $request, $arguments = null)\n    {\n        $config = config('AccessProperties');\n        $apiKey = $config->api_key;\n\n        $header = $request->getHeaderLine('X-Api');\n        $token  = str_replace('Bearer ', '', $header);\n\n        if ($token !== $apiKey) {\n            return service('response')\n                ->setJSON([\n                    'status'  => false,\n                    'message' => 'Unauthorized access'\n                ])\n                ->setStatusCode(401);\n        }\n    }\n\n    public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)\n    {\n        // No action required\n    }\n}",
         "id": 9
-    },
-    {
-        "category": "CodeIgniter",
-        "code": "bcvnbv",
-        "description": "edswd",
-        "command": "wdswasd",
-        "id": 10
-    },
-    {
-        "category": "CodeIgniter",
-        "code": "bcvnbv",
-        "description": "vxc",
-        "command": "xv",
-        "id": 11
-    },
-    {
-        "category": "HTML",
-        "code": "bcvnbv",
-        "description": "xfb vb",
-        "command": "b vvb v",
-        "id": 12
-    },
-    {
-        "category": "JavaScript",
-        "code": "cbvc bvn",
-        "description": "dvfcxc",
-        "command": "cvcv",
-        "id": 13
-    },
-    {
-        "category": "JavaScript",
-        "code": "bcvnbv",
-        "description": "cvxc",
-        "command": "xbcv v",
-        "id": 14
     }
 ];
