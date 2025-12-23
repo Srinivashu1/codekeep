@@ -55,5 +55,54 @@ const records = [
         "description": "Implement authentication in CodeIgniter using Filter",
         "command": "public array $aliases = [\n    'apiauth' => \\App\\Filters\\ApiAuthFilter::class,\n];\n// Routes\n$routes->group('api', ['filter' => 'apiauth'], function ($routes) {\n    $routes->post('search', 'Api::searchFunc');\n});\n\n//App/Filters/ApiAuthFilter.php\n\n\nnamespace App\\Filters;\n\nuse CodeIgniter\\HTTP\\RequestInterface;\nuse CodeIgniter\\HTTP\\ResponseInterface;\nuse CodeIgniter\\Filters\\FilterInterface;\n\nclass ApiAuthFilter implements FilterInterface\n{\n    public function before(RequestInterface $request, $arguments = null)\n    {\n        $config = config('AccessProperties');\n        $apiKey = $config->api_key;\n\n        $header = $request->getHeaderLine('X-Api');\n        $token  = str_replace('Bearer ', '', $header);\n\n        if ($token !== $apiKey) {\n            return service('response')\n                ->setJSON([\n                    'status'  => false,\n                    'message' => 'Unauthorized access'\n                ])\n                ->setStatusCode(401);\n        }\n    }\n\n    public function after(RequestInterface $request, ResponseInterface $response, $arguments = null)\n    {\n        // No action required\n    }\n}",
         "id": 9
+    },
+    {
+        "category": "PHP",
+        "code": "vcc",
+        "description": "cvc",
+        "command": "xcvx",
+        "id": 10
+    },
+    {
+        "category": "PHP",
+        "code": "cvx",
+        "description": "cb xv",
+        "command": "xcxcbvxc",
+        "id": 11
+    },
+    {
+        "category": "Ubuntu Command",
+        "code": "Open logind.conf",
+        "description": "Start Command mode",
+        "command": "sudo nano /etc/systemd/logind.conf",
+        "id": 12
+    },
+    {
+        "category": "Ubuntu Command",
+        "code": "Edit code",
+        "description": "Logind changes",
+        "command": "HandleLidSwitch=ignore\nHandleLidSwitchExternalPower=ignore\nHandleLidSwitchDocked=ignore",
+        "id": 13
+    },
+    {
+        "category": "Ubuntu Command",
+        "code": "Command mode",
+        "description": "Command mode enter",
+        "command": "sudo systemctl restart systemd-logind",
+        "id": 14
+    },
+    {
+        "category": "Ubuntu Command",
+        "code": "Exit Command mode",
+        "description": "Exit",
+        "command": "sudo systemctl restart gdm",
+        "id": 15
+    },
+    {
+        "category": "Ubuntu Command",
+        "code": "Reboot   ---   Restart the system (if stuck)",
+        "description": "After logging in:\nforce reboot:\nCtrl + Alt + Del",
+        "command": "sudo reboot",
+        "id": 16
     }
 ];
